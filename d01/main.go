@@ -97,7 +97,7 @@ func part2(input inputT) int {
 }
 
 func main() {
-	input := utils.ReadLines("input.txt")
+	input := utils.ReadLines(utils.Filepath())
 
 	part1(input)
 	part2(input)
