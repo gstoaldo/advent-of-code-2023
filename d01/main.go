@@ -31,7 +31,7 @@ var mapToDigit = map[string]string{
 	"9":     "9",
 }
 
-func calibrationValueP1(line string) int {
+func calibrationValue(line string) int {
 	re := regexp.MustCompile(`\d`)
 
 	matches := re.FindAllString(line, -1)
@@ -52,11 +52,9 @@ func calibrationValueP1(line string) int {
 	return number
 }
 
-func calibrationValueP2(line string) int {
-	first := ""
-	second := ""
+func translate(line string) string {
+	result := ""
 
-	// find first digit
 	for i := range line {
 		for key, value := range mapToDigit {
 			if i+len(key) > len(line) {
@@ -66,48 +64,19 @@ func calibrationValueP2(line string) int {
 			substring := line[i : i+len(key)]
 
 			if substring == key {
-				first = value
-				break
+				result += value
 			}
-		}
-
-		if first != "" {
-			break
 		}
 	}
 
-	// find second digit
-	for i := len(line); i > 0; i-- {
-		for key, value := range mapToDigit {
-			if i-len(key) < 0 {
-				continue
-			}
-
-			substring := line[i-len(key) : i]
-
-			if substring == key {
-				second = value
-				break
-			}
-		}
-
-		if second != "" {
-			break
-		}
-	}
-
-	//
-	numberStr := first + second
-	number, _ := strconv.Atoi(numberStr)
-
-	return number
+	return result
 }
 
 func part1(input inputT) int {
 	sum := 0
 
 	for _, line := range input {
-		sum += calibrationValueP1(line)
+		sum += calibrationValue(line)
 	}
 
 	fmt.Println(sum)
@@ -119,7 +88,7 @@ func part2(input inputT) int {
 	sum := 0
 
 	for _, line := range input {
-		sum += calibrationValueP2(line)
+		sum += calibrationValue(translate(line))
 	}
 
 	fmt.Println(sum)

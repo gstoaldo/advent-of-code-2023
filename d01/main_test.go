@@ -9,7 +9,7 @@ import (
 var example1 = utils.ReadLines("example1.txt")
 var example2 = utils.ReadLines("example2.txt")
 
-func TestCalibrationValueP1(t *testing.T) {
+func TestCalibrationValue(t *testing.T) {
 	testcases := []struct {
 		line     string
 		expected int
@@ -21,7 +21,7 @@ func TestCalibrationValueP1(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		got := calibrationValueP1(tc.line)
+		got := calibrationValue(tc.line)
 
 		if got != tc.expected {
 			t.Fatalf("expected: %v, got: %v", tc.expected, got)
@@ -29,32 +29,20 @@ func TestCalibrationValueP1(t *testing.T) {
 	}
 }
 
-func TestCalibrationValueP2(t *testing.T) {
+func TestTranslate(t *testing.T) {
 	testcases := []struct {
 		line     string
-		expected int
+		expected string
 	}{
-		{example2[0], 29},
-		{example2[1], 83},
-		{example2[2], 13},
-		{example2[3], 24},
-		{example2[4], 42},
-		{example2[5], 14},
-		{example2[6], 76},
-		{"rphtbkncs4nznsix", 46},
-		{"nineeighttworhtvxdtxp8twoneh", 91},
-		{"63eightsixgdsdqqxzzsbnkt782", 62},
-		{"three6fivefoursixgtzfzbkhmnplfm", 36},
-		{"fourgtwopbjbcvgtwo3one", 41},
-		{"5three1", 51},
-		{"nine671seventwotwonejkf", 91},
-		{"twone", 21},
-		{"21", 21},
-		{"shrzvdcghblt21", 21},
+		{example2[0], "219"},
+		{example2[1], "823"},
+		{example2[2], "123"},
+		{"twoone", "21"},
+		{"twone", "21"},
 	}
 
 	for _, tc := range testcases {
-		got := calibrationValueP2(tc.line)
+		got := translate(tc.line)
 
 		if got != tc.expected {
 			t.Fatalf("expected: %v, got: %v", tc.expected, got)
