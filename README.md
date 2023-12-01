@@ -8,10 +8,16 @@ Change directory to desired day.
 $ cd d01
 ```
 
-Run Part 1 and Part 2 solutions:
+Run Part 1 and Part 2 solutions with the puzzle input:
 
 ```
 $ go run .
+```
+
+Run Part 1 and Part 2 solutions with example input:
+
+```
+$ go run . example.txt
 ```
 
 Run tests:
