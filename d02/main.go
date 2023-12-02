@@ -45,18 +45,24 @@ func parse(lines []string) inputT {
 	return result
 }
 
+func gameIsValid(game [][]int, config []int) bool {
+	valid := true
+	for _, set := range game {
+		for colorID := range set {
+			valid = valid && set[colorID] <= config[colorID]
+		}
+	}
+
+	return valid
+}
+
 func part1(input inputT) int {
 	result := 0
 	config := []int{12, 13, 14}
 
 	for i, game := range input {
 		gameID := i + 1
-		valid := true
-		for _, set := range game {
-			for colorID := range set {
-				valid = valid && set[colorID] <= config[colorID]
-			}
-		}
+		valid := gameIsValid(game, config)
 
 		if valid {
 			result += gameID
@@ -66,11 +72,43 @@ func part1(input inputT) int {
 	return result
 }
 
+func gameMinConfig(game [][]int) []int {
+	result := [3]int{}
+
+	for _, set := range game {
+		for colorID := range set {
+			result[colorID] = utils.Max(result[colorID], set[colorID])
+		}
+	}
+
+	return result[:]
+}
+
+func power(set []int) int {
+	result := 1
+	for _, color := range set {
+		result *= color
+	}
+
+	return result
+}
+
+func part2(input inputT) int {
+	result := 0
+
+	for _, game := range input {
+		power := power(gameMinConfig(game))
+		result += power
+	}
+
+	return result
+}
+
 func main() {
 	input := parse(utils.ReadLines(utils.Filepath()))
 
 	p1 := part1(input)
-	p2 := 0
+	p2 := part2(input)
 
 	fmt.Printf("Part 1: %v\nPart 2: %v\n", p1, p2)
 }
