@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -106,9 +105,8 @@ func part2(input inputT) int {
 
 func main() {
 	input := parse(utils.ReadLines(utils.Filepath()))
-
 	p1 := part1(input)
 	p2 := part2(input)
 
-	fmt.Printf("Part 1: %v\nPart 2: %v\n", p1, p2)
+	utils.PrintSolution(p1, p2)
 }

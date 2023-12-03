@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
 	"unicode"
@@ -74,11 +73,37 @@ func part1(input inputT) int {
 	return sum
 }
 
+func part2(input inputT) int {
+	numbers, symbols := parse(input)
+
+	sum := 0
+
+	for _, symbol := range symbols {
+		if input[symbol.i][symbol.j] != '*' {
+			continue
+		}
+
+		gearNumbers := []int{}
+
+		for _, number := range numbers {
+			topLeft, bottomRight := rect(number)
+			if inside(symbol, topLeft, bottomRight) {
+				gearNumbers = append(gearNumbers, number.value)
+			}
+		}
+
+		if len(gearNumbers) == 2 {
+			sum += gearNumbers[0] * gearNumbers[1]
+		}
+	}
+
+	return sum
+}
+
 func main() {
 	input := utils.ReadLines(utils.Filepath())
-
 	p1 := part1(input)
-	p2 := 0
+	p2 := part2(input)
 
-	fmt.Printf("Part 1: %v\nPart 2: %v\n", p1, p2)
+	utils.PrintSolution(p1, p2)
 }

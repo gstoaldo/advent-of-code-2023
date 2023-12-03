@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
 
@@ -79,8 +78,6 @@ func part1(input inputT) int {
 		sum += calibrationValue(line)
 	}
 
-	fmt.Println(sum)
-
 	return sum
 }
 
@@ -91,14 +88,13 @@ func part2(input inputT) int {
 		sum += calibrationValue(translate(line))
 	}
 
-	fmt.Println(sum)
-
 	return sum
 }
 
 func main() {
 	input := utils.ReadLines(utils.Filepath())
+	p1 := part1(input)
+	p2 := part2(input)
 
-	part1(input)
-	part2(input)
+	utils.PrintSolution(p1, p2)
 }
