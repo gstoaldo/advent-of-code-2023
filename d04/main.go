@@ -60,10 +60,35 @@ func part1(cards []card) int {
 	return sum
 }
 
+func part2(cards []card) int {
+	copies := map[int]int{}
+
+	for i, card := range cards {
+		cardID := i + 1
+		matches := 0
+		for n := range card.mySet {
+			if card.winningSet[n] {
+				matches++
+			}
+		}
+
+		for j := 1; j <= matches && matches > 0; j++ {
+			copies[cardID+j] += 1 + copies[cardID]
+		}
+	}
+
+	totalCards := len(cards) // including the original set of cards
+	for _, ncopies := range copies {
+		totalCards += ncopies
+	}
+
+	return totalCards
+}
+
 func main() {
 	games := parse(utils.ReadLines(utils.Filepath()))
 	p1 := part1(games)
-	p2 := 0
+	p2 := part2(games)
 
 	utils.PrintSolution(p1, p2)
 }
