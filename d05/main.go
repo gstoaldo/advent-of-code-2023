@@ -59,23 +59,39 @@ func convert(n int, mapRanges []mapRange) int {
 	return n
 }
 
+func seedToLocation(seed seed, maps [][]mapRange) int {
+	source := int(seed)
+	for _, mapRanges := range maps {
+		source = convert(source, mapRanges)
+	}
+
+	return source
+}
+
 func part1(seeds []seed, maps [][]mapRange) int {
 	min := math.MaxInt
 	for _, seed := range seeds {
-		source := int(seed)
-		for _, mapRanges := range maps {
-			source = convert(source, mapRanges)
-		}
-		min = utils.Min(min, source)
+		min = utils.Min(min, seedToLocation(seed, maps))
 	}
 
+	return min
+}
+
+func part2(seedRanges []seed, maps [][]mapRange) int {
+	min := math.MaxInt
+
+	for i := 0; i < len(seedRanges); i = i + 2 {
+		for seed := seedRanges[i]; seed < seedRanges[i]+seedRanges[i+1]; seed++ {
+			min = utils.Min(min, seedToLocation(seed, maps))
+		}
+	}
 	return min
 }
 
 func main() {
 	seeds, maps := parse(utils.Filepath())
 	p1 := part1(seeds, maps)
-	p2 := 0
+	p2 := part2(seeds, maps)
 
 	utils.PrintSolution(p1, p2)
 }
