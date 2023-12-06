@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
 
@@ -56,10 +57,33 @@ func part1(times, dists []int) int {
 	return result
 }
 
+func part2(times, dists []int) int {
+	maxTimeStr := ""
+	for _, t := range times {
+		maxTimeStr += fmt.Sprintf("%v", t)
+	}
+	maxTime, _ := strconv.Atoi(maxTimeStr)
+
+	maxDistStr := ""
+	for _, d := range dists {
+		maxDistStr += fmt.Sprintf("%v", d)
+	}
+	maxDist, _ := strconv.Atoi(maxDistStr)
+
+	numberOfWays := 0
+	for holdTime := 1; holdTime <= maxTime; holdTime++ {
+		if position(holdTime, maxTime) > maxDist {
+			numberOfWays++
+		}
+	}
+
+	return numberOfWays
+}
+
 func main() {
 	times, dists := parse(utils.Filepath())
 	p1 := part1(times, dists)
-	p2 := 0
+	p2 := part2(times, dists)
 
 	utils.PrintSolution(p1, p2)
 }
