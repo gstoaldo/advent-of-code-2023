@@ -9,9 +9,10 @@ import (
 	"github.com/gstoaldo/advent-of-code-2023/utils"
 )
 
-var cardRanks = []rune{'A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'}
+var cardRanksP1 = []rune{'A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'}
+var cardRanksP2 = []rune{'A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J'}
 
-func getCardRanksMap() map[rune]int {
+func getCardRanksMap(cardRanks []rune) map[rune]int {
 	result := map[rune]int{}
 
 	for i := 0; i < len(cardRanks); i++ {
@@ -20,8 +21,6 @@ func getCardRanksMap() map[rune]int {
 
 	return result
 }
-
-var cardRanksMap = getCardRanksMap()
 
 func parse(filepath string) ([]string, []int) {
 	lines := utils.ReadLines(filepath)
@@ -98,20 +97,24 @@ func _hc(handMap handMapT) bool {
 	return len(handMap) == 5
 }
 
-func handRank(hand string) []int {
+func typeRank(hand string) int {
 	types := []func(handMapT) bool{
 		_5ok, _4ok, _fh, _3ok, _2p, _1p, _hc,
 	}
 	_handMap := handMap(hand)
 
-	rank := []int{}
-
 	for i := 0; i < len(types); i++ {
 		if types[i](_handMap) {
-			rank = append(rank, len(types)-i)
-			break
+			return len(types) - i
 		}
 	}
+
+	panic("type rank not found")
+}
+
+func handRank(hand string, cardRanksMap map[rune]int) []int {
+	rank := []int{}
+	rank = append(rank, typeRank(hand))
 
 	for _, r := range hand {
 		rank = append(rank, cardRanksMap[r])
@@ -121,8 +124,9 @@ func handRank(hand string) []int {
 }
 
 func isStronger(handA, handB string) bool {
-	handARank := handRank(handA)
-	handBRank := handRank(handB)
+	cardRanksMap := getCardRanksMap(cardRanksP1)
+	handARank := handRank(handA, cardRanksMap)
+	handBRank := handRank(handB, cardRanksMap)
 
 	for i := range handARank {
 		if handARank[i] == handBRank[i] {
@@ -135,27 +139,66 @@ func isStronger(handA, handB string) bool {
 	panic("hands are equal")
 }
 
-func part1(hands []string, bids []int) int {
+func isStrongerWithJoker(handA, handB string) bool {
+	cardRanksMap := getCardRanksMap(cardRanksP2)
+	handARank := handRank(handA, cardRanksMap)
+	handBRank := handRank(handB, cardRanksMap)
+
+	handARank[0] = maxPossible(handA)
+	handBRank[0] = maxPossible(handB)
+
+	for i := range handARank {
+		if handARank[i] == handBRank[i] {
+			continue
+		}
+
+		return handARank[i] > handBRank[i]
+	}
+
+	panic("hands are equal")
+}
+
+func maxPossible(hand string) int {
+	max := 0
+
+	for _, c := range cardRanksP2 {
+		max = utils.Max(max, typeRank(strings.Replace(hand, "J", string(c), -1)))
+	}
+
+	return max
+}
+
+func totalWinnings(hands []string, bids []int, less func(i, j string) bool) int {
 	handToBid := map[string]int{}
 
 	for i, hand := range hands {
 		handToBid[hand] = bids[i]
 	}
 
-	sort.SliceStable(hands, func(i, j int) bool {
-		return isStronger(hands[i], hands[j])
+	handsSorted := append([]string{}, hands...)
+
+	sort.SliceStable(handsSorted, func(i, j int) bool {
+		return less(handsSorted[i], handsSorted[j])
 	})
 
 	sum := 0
-
-	for i, hand := range hands {
-		sum += (len(hands) - i) * handToBid[hand]
+	for i, handsSorted := range handsSorted {
+		sum += (len(hands) - i) * handToBid[handsSorted]
 	}
 
 	return sum
 }
 
+func part1(hands []string, bids []int) int {
+	return totalWinnings(hands, bids, isStronger)
+}
+
+func part2(hands []string, bids []int) int {
+	return totalWinnings(hands, bids, isStrongerWithJoker)
+}
+
 func main() {
 	hands, bids := parse(utils.Filepath())
 	fmt.Println(part1(hands, bids))
+	fmt.Println(part2(hands, bids))
 }

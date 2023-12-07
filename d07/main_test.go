@@ -22,7 +22,7 @@ func Test_handRank(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		got := handRank(tc.hand)
+		got := handRank(tc.hand, getCardRanksMap(cardRanksP1))
 
 		if !reflect.DeepEqual(got, tc.expected) {
 			t.Fatalf("expected: %v, got: %v", tc.expected, got)
@@ -46,6 +46,27 @@ func Test_is_stronger(t *testing.T) {
 
 	for _, tc := range testcases {
 		got := isStronger(tc.handA, tc.handB)
+
+		if !reflect.DeepEqual(got, tc.expected) {
+			t.Fatalf("expected: %v, got: %v", tc.expected, got)
+		}
+	}
+}
+
+func Test_max_possible(t *testing.T) {
+	testcases := []struct {
+		hand     string
+		expected int
+	}{
+		{"32T3K", 2},
+		{"KK677", 3},
+		{"T55J5", 6},
+		{"KTJJT", 6},
+		{"QQQJA", 6},
+	}
+
+	for _, tc := range testcases {
+		got := maxPossible(tc.hand)
 
 		if !reflect.DeepEqual(got, tc.expected) {
 			t.Fatalf("expected: %v, got: %v", tc.expected, got)
