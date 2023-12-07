@@ -15,8 +15,8 @@ func Filepath() string {
 	return filepath
 }
 
-func ReadFile(path string) string {
-	file, err := os.ReadFile(path)
+func ReadFile(filepath string) string {
+	file, err := os.ReadFile(filepath)
 	if err != nil {
 		panic("error reading file")
 	}
@@ -24,8 +24,8 @@ func ReadFile(path string) string {
 	return string(file)
 }
 
-func ReadLines(path string) []string {
-	file := ReadFile(path)
+func ReadLines(filepath string) []string {
+	file := ReadFile(filepath)
 
 	return strings.Split(string(file), "\n")
 }
