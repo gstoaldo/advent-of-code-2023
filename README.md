@@ -2,6 +2,8 @@
 
 https://adventofcode.com/2023
 
+## how to run
+
 Change directory to desired day.
 
 ```
@@ -17,11 +19,19 @@ $ go run .
 Run Part 1 and Part 2 solutions with example input:
 
 ```
-$ go run . example.txt
+$ go run . example1.txt
 ```
 
 Run tests:
 
 ```
 $ go test
+```
+
+## create new day using template
+
+Enter day number (D) as argument. Example:
+
+```
+$ sh template.sh 3 // Creates d03 folder and files
 ```
