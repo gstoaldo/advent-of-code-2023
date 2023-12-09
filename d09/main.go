@@ -42,27 +42,40 @@ func sequenceDiff(sequence []int) []int {
 	return result
 }
 
-func extrapolate(sequence []int) int {
+func extrapolate(sequence []int, backwards bool) int {
 	if allZeros(sequence) {
 		return 0
 	}
 
-	nextValue := extrapolate(sequenceDiff(sequence))
+	nextValue := extrapolate(sequenceDiff(sequence), backwards)
+
+	if backwards {
+		return sequence[0] - nextValue
+	}
 
 	return sequence[len(sequence)-1] + nextValue
 }
 
-func part1(input [][]int) int {
+func sumExtrapolation(input [][]int, backwards bool) int {
 	sum := 0
 
 	for _, sequence := range input {
-		sum += extrapolate(sequence)
+		sum += extrapolate(sequence, backwards)
 	}
 
 	return sum
 }
 
+func part1(input [][]int) int {
+	return sumExtrapolation(input, false)
+}
+
+func part2(input [][]int) int {
+	return sumExtrapolation(input, true)
+}
+
 func main() {
 	input := parse(utils.Filepath())
 	fmt.Println(part1(input))
+	fmt.Println(part2(input))
 }

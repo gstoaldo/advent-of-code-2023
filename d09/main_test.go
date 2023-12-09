@@ -15,7 +15,26 @@ func Test_extrapolate(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		got := extrapolate(tc.sequence)
+		got := extrapolate(tc.sequence, false)
+
+		if got != tc.expected {
+			t.Fatalf("expected: %v, got: %v", tc.expected, got)
+		}
+	}
+}
+
+func Test_extrapolate_backwards(t *testing.T) {
+	testcases := []struct {
+		sequence []int
+		expected int
+	}{
+		{example1[0], -3},
+		{example1[1], 0},
+		{example1[2], 5},
+	}
+
+	for _, tc := range testcases {
+		got := extrapolate(tc.sequence, true)
 
 		if got != tc.expected {
 			t.Fatalf("expected: %v, got: %v", tc.expected, got)
