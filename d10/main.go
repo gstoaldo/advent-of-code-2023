@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/gstoaldo/advent-of-code-2023/utils"
 )
@@ -65,18 +67,13 @@ func startNeighbors(input inputT, startPos pos) []pos {
 	return result
 }
 
-func pipeLength(input inputT, startPos pos) int {
+func pipeLoop(input inputT, startPos pos) map[pos]bool {
 	visited := map[pos]bool{}
-	path := []pos{}
-
 	visited[startPos] = true
-	path = append(path, startPos)
 
 	current := startNeighbors(input, startPos)[0]
-
 	for current != startPos {
 		visited[current] = true
-		path = append(path, current)
 
 		for _, n := range neighbors(input, current) {
 			if visited[n] && n != startPos {
@@ -86,17 +83,83 @@ func pipeLength(input inputT, startPos pos) int {
 			current = n
 			break
 		}
-
 	}
 
-	return len(path)
+	return visited
 }
 
 func part1(input inputT) int {
-	return pipeLength(input, findStart(input)) / 2
+	return len(pipeLoop(input, findStart(input))) / 2
+}
+
+func filterRowPipes(current pos, input inputT, loop map[pos]bool) string {
+	result := ""
+	for j := current.j; j < len(input[0]); j++ {
+		if loop[pos{current.i, j}] {
+			result += string(input[current.i][j])
+		}
+
+	}
+
+	return result
+}
+
+func replaceTurns(pipesInRow string) string {
+	exps := []struct {
+		re  *regexp.Regexp
+		new string
+	}{
+		{regexp.MustCompile(`L-*J`), "||"},
+		{regexp.MustCompile(`F-*7`), "||"},
+		{regexp.MustCompile(`F-*J`), "|"},
+		{regexp.MustCompile(`L-*7`), "|"},
+	}
+
+	result := pipesInRow
+
+	for _, exp := range exps {
+		result = exp.re.ReplaceAllString(result, exp.new)
+	}
+
+	return result
+}
+
+func isInside(input inputT, loop map[pos]bool, current pos) bool {
+	text := replaceTurns(filterRowPipes(current, input, loop))
+
+	return len(text)%2 != 0
+}
+
+func part2(input inputT, startShape string) int {
+	count := 0
+
+	start := findStart(input)
+	_pipeLoop := pipeLoop(input, start)
+
+	input[start.i] = strings.Replace(input[start.i], "S", startShape, -1)
+
+	for i := 0; i < len(input); i++ {
+		for j := 0; j < len(input[0]); j++ {
+			current := pos{i, j}
+			if _pipeLoop[current] {
+				continue
+			}
+
+			if isInside(input, _pipeLoop, current) {
+				count++
+			}
+		}
+	}
+
+	return count
 }
 
 func main() {
 	input := parse(utils.Filepath())
 	fmt.Println(part1(input))
+
+	// TODO: find starting position pipe shape
+	// example 4, S = F
+	// input, S = L
+	fmt.Println(part2(input, "L"))
 }
