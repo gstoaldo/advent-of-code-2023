@@ -21,7 +21,7 @@ func Test_filter_row(t *testing.T) {
 	example := parse("example3.txt")
 	start := findStart(example)
 	current := pos{3, 3}
-	got := filterRowPipes(current, example, pipeLoop(example, start))
+	got := filterRowPipesToTheRight(current, example, pipeLoop(example, start))
 
 	expected := "||"
 

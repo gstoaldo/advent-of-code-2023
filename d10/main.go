@@ -92,13 +92,12 @@ func part1(input inputT) int {
 	return len(pipeLoop(input, findStart(input))) / 2
 }
 
-func filterRowPipes(current pos, input inputT, loop map[pos]bool) string {
+func filterRowPipesToTheRight(current pos, input inputT, loop map[pos]bool) string {
 	result := ""
 	for j := current.j; j < len(input[0]); j++ {
 		if loop[pos{current.i, j}] {
 			result += string(input[current.i][j])
 		}
-
 	}
 
 	return result
@@ -125,9 +124,14 @@ func replaceTurns(pipesInRow string) string {
 }
 
 func isInside(input inputT, loop map[pos]bool, current pos) bool {
-	text := replaceTurns(filterRowPipes(current, input, loop))
+	// A tile is enclosed by the loop if, going in any direction, the number of
+	// pipes crossed is odd.
 
-	return len(text)%2 != 0
+	// I pick a tile (current) and look all the tiles to the right. Then replace
+	// U turns by "||" and Z turns by "|" (check image).
+	replaced := replaceTurns(filterRowPipesToTheRight(current, input, loop))
+
+	return len(replaced)%2 != 0
 }
 
 func part2(input inputT, startShape string) int {
