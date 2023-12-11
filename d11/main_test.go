@@ -35,7 +35,7 @@ func Test_distance(t *testing.T) {
 	rowsToExpand, colsToExpand := rowAndColToExpand(example)
 
 	for _, tc := range testcases {
-		got := dist(tc.galaxyA, tc.galaxyB, rowsToExpand, colsToExpand)
+		got := dist(tc.galaxyA, tc.galaxyB, rowsToExpand, colsToExpand, 2)
 
 		if got != tc.expected {
 			t.Fatalf("expected: %v, got: %v", tc.expected, got)
