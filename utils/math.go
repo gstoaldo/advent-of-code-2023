@@ -20,3 +20,11 @@ func Abs(x int) int {
 	}
 	return x
 }
+
+func Sum(list []int) int {
+	result := 0
+	for _, v := range list {
+		result += v
+	}
+	return result
+}
