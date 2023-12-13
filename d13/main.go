@@ -31,20 +31,27 @@ func transpose(pattern patternT) patternT {
 	return transposed
 }
 
-func findHAxis(pattern patternT) int {
+func findHAxis(pattern patternT, fix bool) int {
 	for x := 1; x < len(pattern); x++ {
-		minLen := utils.Min(len(pattern)-x, x)
+		fixedCount := 1
+		if fix {
+			fixedCount = 0
+		}
 
+		minLen := utils.Min(len(pattern)-x, x)
 		isAxis := true
 
 		for i := 0; i < minLen; i++ {
-			if pattern[x-1-i] != pattern[x+i] {
+			a, b := pattern[x-1-i], pattern[x+i]
+			fixedCount += countDiff(a, b)
+
+			if a != b && fixedCount > 1 {
 				isAxis = false
 				break
 			}
 		}
 
-		if isAxis {
+		if isAxis && fixedCount == 1 {
 			return x
 		}
 	}
@@ -52,17 +59,29 @@ func findHAxis(pattern patternT) int {
 	return 0
 }
 
-func findVAxis(pattern patternT) int {
-	transposed := transpose(pattern)
-
-	return findHAxis(transposed)
+func findVAxis(pattern patternT, fix bool) int {
+	return findHAxis(transpose(pattern), fix)
 }
 
-func part1(patterns []patternT) int {
+func countDiff(a, b string) int {
+	if a == b {
+		return 0
+	}
+
+	count := 0
+	for i := 0; i < len(a); i++ {
+		if a[i] != b[i] {
+			count++
+		}
+	}
+	return count
+}
+
+func summarize(patterns []patternT, fix bool) int {
 	sum := 0
 	for _, p := range patterns {
-		vAxis := findVAxis(p)
-		hAxis := findHAxis(p)
+		vAxis := findVAxis(p, fix)
+		hAxis := findHAxis(p, fix)
 
 		sum += vAxis + 100*hAxis
 	}
@@ -70,7 +89,16 @@ func part1(patterns []patternT) int {
 	return sum
 }
 
+func part1(patterns []patternT) int {
+	return summarize(patterns, false)
+}
+
+func part2(patterns []patternT) int {
+	return summarize(patterns, true)
+}
+
 func main() {
 	patterns := parse(utils.Filepath())
 	fmt.Println(part1(patterns))
+	fmt.Println(part2(patterns))
 }
