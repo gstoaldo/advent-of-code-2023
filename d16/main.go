@@ -84,9 +84,9 @@ func step(grid gridT, head headT) []headT {
 	return nextHeads
 }
 
-func run(grid gridT) map[headT]bool {
+func run(grid gridT, initialHead headT) map[headT]bool {
 	visited := map[headT]bool{}
-	queue := []headT{{0, 0, 0, 1}}
+	queue := []headT{initialHead}
 
 	for len(queue) > 0 {
 		// printGrid(grid, visited)
@@ -117,7 +117,31 @@ func countEnergizedTiles(visited map[headT]bool) int {
 }
 
 func part1(grid gridT) int {
-	return countEnergizedTiles(run(grid))
+	initialHead := headT{0, 0, 0, 1}
+	return countEnergizedTiles(run(grid, initialHead))
+}
+
+func part2(grid gridT) int {
+	max := 0
+
+	var head headT
+	for i := range grid {
+		head = headT{i, 0, 0, 1}
+		max = utils.Max(max, countEnergizedTiles(run(grid, head)))
+
+		head = headT{i, len(grid[0]) - 1, 0, -1}
+		max = utils.Max(max, countEnergizedTiles(run(grid, head)))
+	}
+
+	for j := range grid[0] {
+		head = headT{0, j, 1, 0}
+		max = utils.Max(max, countEnergizedTiles(run(grid, head)))
+
+		head = headT{len(grid) - 1, j, -1, 0}
+		max = utils.Max(max, countEnergizedTiles(run(grid, head)))
+	}
+
+	return max
 }
 
 func printGrid(grid gridT, visited map[headT]bool) {
@@ -143,4 +167,5 @@ func printGrid(grid gridT, visited map[headT]bool) {
 func main() {
 	grid := parse(utils.Filepath())
 	fmt.Println(part1(grid))
+	fmt.Println(part2(grid))
 }
