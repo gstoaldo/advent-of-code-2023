@@ -16,13 +16,26 @@ type stepT struct {
 
 type edgeT struct {
 	x0, y0, x1, y1 int
-	color          string
 }
 
 type coordT struct{ x, y int }
 
+var dirToDeltas = map[string]struct{ dx, dy int }{
+	"U": {0, -1},
+	"D": {0, 1},
+	"R": {1, 0},
+	"L": {-1, 0},
+}
+
+var lastDigitToDir = map[string]string{
+	"0": "R",
+	"1": "D",
+	"2": "L",
+	"3": "U",
+}
+
 func parse(filepath string) (result []stepT) {
-	re := regexp.MustCompile(`(\w).(\d+)..(#\w+)`)
+	re := regexp.MustCompile(`(\w).(\d+)...(\w+)`)
 
 	for _, line := range utils.ReadLines(filepath) {
 		matches := re.FindStringSubmatch(line)
@@ -38,13 +51,6 @@ func parse(filepath string) (result []stepT) {
 	return result
 }
 
-var dirToDeltas = map[string]struct{ dx, dy int }{
-	"U": {0, -1},
-	"D": {0, 1},
-	"R": {1, 0},
-	"L": {-1, 0},
-}
-
 func edges(steps []stepT) (result []edgeT) {
 	x, y := 0, 0
 	for _, step := range steps {
@@ -52,11 +58,10 @@ func edges(steps []stepT) (result []edgeT) {
 		y1 := y + dirToDeltas[step.dir].dy*step.length
 
 		result = append(result, edgeT{
-			x0:    x,
-			x1:    x1,
-			y0:    y,
-			y1:    y1,
-			color: step.color,
+			x0: x,
+			x1: x1,
+			y0: y,
+			y1: y1,
 		})
 
 		x, y = x1, y1
@@ -88,11 +93,31 @@ func digArea(steps []stepT) int {
 	return perimeter/2 + polygonArea(edges(steps)) + 1
 }
 
+func convert(steps []stepT) (result []stepT) {
+	for _, step := range steps {
+		hex := step.color[:len(step.color)-1]
+		decimal, _ := strconv.ParseInt(hex, 16, 64)
+		lastDigit := step.color[len(step.color)-1]
+
+		result = append(result, stepT{
+			dir:    lastDigitToDir[string(lastDigit)],
+			length: int(decimal),
+		})
+	}
+
+	return result
+}
+
 func part1(steps []stepT) int {
 	return digArea(steps)
+}
+
+func part2(steps []stepT) int {
+	return digArea(convert(steps))
 }
 
 func main() {
 	steps := parse(utils.Filepath())
 	fmt.Println(part1(steps))
+	fmt.Println(part2(steps))
 }
