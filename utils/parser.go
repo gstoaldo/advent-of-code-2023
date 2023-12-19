@@ -2,6 +2,7 @@ package utils
 
 import (
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -28,4 +29,14 @@ func ReadLines(filepath string) []string {
 	file := ReadFile(filepath)
 
 	return strings.Split(string(file), "\n")
+}
+
+func ToInt(s string) int {
+	v, err := strconv.Atoi(s)
+
+	if err != nil {
+		panic("could not convert string to int")
+	}
+
+	return v
 }
