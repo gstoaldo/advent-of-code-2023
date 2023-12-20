@@ -17,19 +17,17 @@ var categoryToIndex = map[string]int{
 }
 
 type workflowT struct {
-	exps         []func(item partT) bool
+	rules        [][]string // category, operator, value
 	destinations []string
 	fallback     string
 }
 
-func condition(category, operator, valueStr string) func(item partT) bool {
-	return func(item partT) bool {
-		if operator == "<" {
-			return item[categoryToIndex[category]] < utils.ToInt(valueStr)
-		}
-
-		return item[categoryToIndex[category]] > utils.ToInt(valueStr)
+func checkRule(category, operator, valueStr string, part partT) bool {
+	if operator == "<" {
+		return part[categoryToIndex[category]] < utils.ToInt(valueStr)
 	}
+
+	return part[categoryToIndex[category]] > utils.ToInt(valueStr)
 }
 
 func parse(filepath string) (map[string]workflowT, []partT) {
@@ -46,15 +44,15 @@ func parse(filepath string) (map[string]workflowT, []partT) {
 		origin := reOrigin.FindString(line)
 		fallback := reFallback.FindStringSubmatch(line)[1]
 
-		exps := []func(part partT) bool{}
+		rules := [][]string{}
 		destinations := []string{}
-		for _, expMatch := range reExp.FindAllStringSubmatch(line, -1) {
-			exps = append(exps, condition(expMatch[2], expMatch[3], expMatch[4]))
-			destinations = append(destinations, expMatch[5])
+		for _, ruleValues := range reExp.FindAllStringSubmatch(line, -1) {
+			rules = append(rules, []string{ruleValues[2], ruleValues[3], ruleValues[4]})
+			destinations = append(destinations, ruleValues[5])
 		}
 
 		workflows[origin] = workflowT{
-			exps:         exps,
+			rules:        rules,
 			destinations: destinations,
 			fallback:     fallback,
 		}
@@ -75,17 +73,19 @@ func parse(filepath string) (map[string]workflowT, []partT) {
 func acceptPart(origin string, workflows map[string]workflowT, part partT) bool {
 	wf := workflows[origin]
 
-	for i, exp := range wf.exps {
-		if exp(part) && wf.destinations[i] == "A" {
+	for i, rule := range wf.rules {
+		passRule, destination := checkRule(rule[0], rule[1], rule[2], part), wf.destinations[i]
+
+		if passRule && destination == "A" {
 			return true
 		}
 
-		if exp(part) && wf.destinations[i] == "R" {
+		if passRule && destination == "R" {
 			return false
 		}
 
-		if exp(part) {
-			return acceptPart(wf.destinations[i], workflows, part)
+		if passRule {
+			return acceptPart(destination, workflows, part)
 		}
 	}
 
@@ -123,7 +123,84 @@ func part1(workflows map[string]workflowT, parts []partT) int {
 	return sum
 }
 
+func splitRanges(ranges [][]int, rule []string) ([][]int, [][]int) {
+	ruleCheckSplit, otherSplit := [][]int{}, [][]int{}
+
+	index := categoryToIndex[rule[0]]
+
+	for i, r := range ranges {
+		if i != index {
+			ruleCheckSplit = append(ruleCheckSplit, r)
+			otherSplit = append(otherSplit, r)
+		} else {
+			limit := utils.ToInt(rule[2])
+
+			if limit < r[0] || limit > r[1] {
+				panic("edge case, limit out of bounds")
+			}
+
+			if rule[1] == "<" {
+				ruleCheckSplit = append(ruleCheckSplit, []int{r[0], limit - 1})
+				otherSplit = append(otherSplit, []int{limit, r[1]})
+			}
+
+			if rule[1] == ">" {
+				ruleCheckSplit = append(ruleCheckSplit, []int{limit + 1, r[1]})
+				otherSplit = append(otherSplit, []int{r[0], limit})
+			}
+		}
+	}
+
+	return ruleCheckSplit, otherSplit
+}
+
+func acceptRanges(origin string, workflows map[string]workflowT, ranges [][]int) int {
+	sum := 0
+	wf := workflows[origin]
+	for i, rule := range wf.rules {
+		splitA, splitB := splitRanges(ranges, rule)
+		ranges = splitB
+
+		if wf.destinations[i] == "A" {
+			sum += countCombinations(splitA)
+			continue
+		}
+
+		if wf.destinations[i] == "R" {
+			continue
+		}
+
+		sum += acceptRanges(wf.destinations[i], workflows, splitA)
+	}
+
+	if wf.fallback == "A" {
+		return sum + countCombinations(ranges)
+	}
+
+	if wf.fallback == "R" {
+		return sum
+	}
+
+	return sum + acceptRanges(wf.fallback, workflows, ranges)
+}
+
+func countCombinations(ranges [][]int) int {
+	result := 1
+
+	for _, r := range ranges {
+		result *= utils.Abs(r[0]-r[1]) + 1
+	}
+
+	return result
+}
+
+func part2(workflows map[string]workflowT, parts []partT) int {
+	ranges := [][]int{{1, 4000}, {1, 4000}, {1, 4000}, {1, 4000}}
+	return acceptRanges("in", workflows, ranges)
+}
+
 func main() {
 	workflows, parts := parse(utils.Filepath())
 	fmt.Println(part1(workflows, parts))
+	fmt.Println(part2(workflows, parts))
 }
