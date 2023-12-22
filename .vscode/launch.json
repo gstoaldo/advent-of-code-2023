@@ -5,13 +5,23 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug current file",
+      "name": "Debug example",
       "type": "go",
       "request": "launch",
       "mode": "auto",
       "program": "${fileDirname}",
       "args": [
         "example1.txt"
+      ]
+    },
+    {
+      "name": "Debug input",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${fileDirname}",
+      "args": [
+        "input.txt"
       ]
     }
   ]
