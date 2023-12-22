@@ -150,16 +150,15 @@ func moveDown(brick brickT) brickT {
 	return brickT{brick.name, p0, p1}
 }
 
-func simulate(bricks []brickT) map[brickT][]brickT {
+func simulate(bricks []brickT) ([]brickT, map[brickT][]brickT) {
 	queue := sortByZ(bricks)
 	stack := []brickT{}
 
-	supports := map[brickT][]brickT{}
+	brickToSupports := map[brickT][]brickT{}
 
 	for len(queue) > 0 {
 		curr := queue[0]
 		queue = queue[1:]
-		// printStack(append(queue, stack...))
 		fmt.Printf("queue: %v\n", len(queue))
 
 		for {
@@ -167,7 +166,7 @@ func simulate(bricks []brickT) map[brickT][]brickT {
 			doCollides, collisions := getCollisions(moved, stack)
 
 			if doCollides {
-				supports[curr] = collisions
+				brickToSupports[curr] = collisions
 				stack = append(stack, curr)
 				break
 			} else {
@@ -176,28 +175,83 @@ func simulate(bricks []brickT) map[brickT][]brickT {
 		}
 	}
 
-	printStack(append(queue, stack...))
-	return supports
+	// printStack(append(queue, stack...))
+	return stack, brickToSupports
 }
 
-func countBricksSafeToDesintegrate(bricks []brickT, supportsMap map[brickT][]brickT) int {
-	onlySupport := map[brickT]bool{}
+func getNotSafeToDesintegrateBricks(bricks []brickT, supportsMap map[brickT][]brickT) map[brickT]bool {
+	notSafe := map[brickT]bool{}
 
 	for _, supports := range supportsMap {
 		if len(supports) == 1 {
-			onlySupport[supports[0]] = true
+			notSafe[supports[0]] = true
 		}
 	}
 
-	return len(bricks) - len(onlySupport)
+	return notSafe
+}
+
+func chainReaction(bricks []brickT, brickToSupports map[brickT][]brickT, start brickT) int {
+	chain := map[brickT]bool{}
+
+	supportToBricks := map[brickT][]brickT{}
+	for b, supports := range brickToSupports {
+		for _, s := range supports {
+			supportToBricks[s] = append(supportToBricks[s], b)
+		}
+	}
+
+	chain[start] = true
+	queue := append([]brickT{}, supportToBricks[start]...)
+
+	for len(queue) > 0 {
+		curr := queue[0]
+		queue = queue[1:]
+
+		supports := brickToSupports[curr]
+		allSupportsInChain := true
+		for _, s := range supports {
+			if !chain[s] {
+				allSupportsInChain = false
+			}
+		}
+
+		if allSupportsInChain {
+			chain[curr] = true
+			queue = append(queue, supportToBricks[curr]...)
+		}
+	}
+
+	return len(chain) - 1
 }
 
 func part1(bricks []brickT) int {
-	supports := simulate(bricks)
-	return countBricksSafeToDesintegrate(bricks, supports)
+	_, supports := simulate(bricks)
+	notSafe := getNotSafeToDesintegrateBricks(bricks, supports)
+
+	return len(bricks) - len(notSafe)
+}
+
+func part2(bricks []brickT) int {
+	defer utils.Timer()()
+
+	sum := 0
+	stack, supports := simulate(bricks)
+	notSafe := getNotSafeToDesintegrateBricks(bricks, supports)
+
+	i := 0
+	for brick := range notSafe {
+		fmt.Printf("chain: %v/%v\n", i, len(notSafe))
+		sum += chainReaction(stack, supports, brick)
+		i++
+	}
+
+	return sum
+
 }
 
 func main() {
 	bricks := parse(utils.Filepath())
-	fmt.Println(part1(bricks)) // 525 too high
+	fmt.Println(part1(bricks))
+	fmt.Println(part2(bricks))
 }
