@@ -160,8 +160,11 @@ func search(grid gridT, start, finish locT, canClimb bool) int {
 	max := 0
 
 	for len(queue) > 0 {
-		head := queue[0]
-		queue = queue[1:]
+		fmt.Println(len(queue))
+
+		// changed from BFS (head = queue[0]) to DFS (head - queue[len(queue)-1]) and its 5x faster.
+		head := queue[len(queue)-1]
+		queue = queue[:len(queue)-1]
 
 		if head.curr == finish {
 			max = utils.Max(max, head.nsteps)
